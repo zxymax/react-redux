@@ -146,6 +146,202 @@ class TodoList extends Component {
 export default TodoList;
 ```
 #### Redux DevTools 浏览器插件安装
+使用Chrome浏览器安装插件
+##### 配置 Redux DevTools
+```javascript
+import { createStore } from 'redux';
+import reducer from './reducer.js';
+const sore = createStore(reducer,
+window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()) // 创建数据存储仓库
+export default store   //暴露出去
+```
+其实就是加了下面代码这样一句话，这句话的意思是：看 `window` 里有没有这个方法，有则执行这个方法。
+window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 
+##### 增加 input 响应事件
+如果想 `input` 发生改变，`redux` 也跟着变，需要在 `input` 增加 `onChange` 响应事件，修改
+`TodoList.js` 文件代码：
+```javascript
+<Input placeholder='Jorna' style={{ width:'250px' }}
+  onChange={this.changeInputValue} />
+```
+写完这一步，还需要在 `constructor` 进行 `this` 绑定，修改 `this` 指向。
+```javascript
+constructor(props) {
+  super(props);
+  this.state = store.getState();
+  this.changeInputValue = this.changeInputValue.bind(this);
+}
+```
+`changeInputValue` 方法可以打印出 `input` 的变化
+```javascript
+changeInputValue(e) {
+  console.log(e.target.value)
+}
+```
+更新 TodoList.js 组件代码
+```javascript
+import React, { Component } from 'react';
+import { Input, Button, List } from 'antd';
+import store from '../../store'; // 引入 store
+// 先声明一个 list 数组，填写一些内容
 
+class TodoList extends Component {
+    constructor(props) {
+      super(props);
+      this.state = store.getState();
+    }
+    // 新增加的 input 事件
+    changeInputValue(e) {
+      console.log(e.target.value)
+    }
+    render() {
+        return (
+            <div>
+                <div>
+                    <Input placeholder={this.state.inputValue}
+                      onChange={this.changeInputValue} style={{ width:'250px' }}
+                      />
+                    <Button type="primary">增加</Button>
+                </div>
+                 <div style={{ margin:'10px',width:'300px' }}>
+                    <List
+                        bordered
+                        dataSource={this.state.list}
+                        renderItem={item=>(<List.Item>{item.title}</List.Item>)}
+                    />
+                </div>
+            </div>
+         );
+    }
+}
+export default TodoList;
+```
+#### 创建 Action 来改变 Redux 里的 State 的值。
+`Action` 就是一个对象，这个对象一般有两个属性，第一个是对 `Action` 的描述，第二个是要改变的值。
+```javascript
+changeInputValue(e) {
+  const action = {
+    type: 'change_input',
+    value: e.target.value
+  }
 
+}
+```
+`action` 创建好了，但是要通过 `dispatch` 方法传递给 `store`。代码如下：
+```javascript
+changeInputValue(e) {
+  const action = {
+    type: 'change_input',
+    value: e.target.value
+  }
+  store.dispatch(action)
+}
+```
+这时候 `Action` 已经创建完了，也和 `store` 有了联系。
+##### store 的自动推送策略
+`state` 和 `action` 参数：
+- `state`: 指的是原始仓库里的状态。
+- `action`: 指的是 `action` 新传递的状态。
+```javascript
+export default (state = defaultState, action) => {
+  console.log(state, action)
+  return state;
+}
+```
+通过打印看出，`Reducer` 已经拿到了原来的数据和新传递过来的数据，现在要做的就是改变 `store`
+里的值。先判断 `type` 是否正确，如果正确，则需要声明一个新的变量 `newState`。（`Reduer` 里只能
+接收 `state`，不能改变 `state`），所以，声明了一个新的变量，需要用 `return` 返回出去。
+```javascript
+export default (state = defaultState, action) => {
+  if (action.type === 'change_input') {
+    let newState = JSON.parse(JSON.stringfy(state));
+    newState.inputValue = action.value;
+    return newState;
+  }
+  return state;
+}
+```
+#### 让组件更新
+`store` 里的数据已经更新了，现在需要更新组件，`TodoList.js` 修改如下：
+```javascript
+constructor(props) {
+      super(props);
+      this.state = store.getState();
+      this.changeInputValue = this.changeInputValue.bind(this);
+      this.storeChange = this.storeChange.bind(this)
+      store.subscribe(this.storeChange) // 订阅 Redux 的状态
+}
+// 下面的方法 更新组件变化
+storeChange () {
+  this.setState(store.getState());
+}
+```
+#### 创建 Action 并用 dispatch 传递给 store
+编写添加按钮响应事件
+```javascript
+<Button
+    type="primary"
+    onClick={this.addItem}
+>增加</Button>
+```
+方法添加 `action` 并用 `dispatch` 传递给 `store`
+```javascript
+addItem() {
+  const action = {
+    type: 'add_item'
+  }
+  store.dispatch(action)
+}
+```
+方法 `addItem` 在 `constructor` 构造函数里进行绑定
+```javascript
+this.addItem = this.addItem.bind(this);
+```
+##### 编写 Reducer 的业务逻辑
+```javascript
+export default (state = defaultState, action) => {
+  if (action.type === 'change_input') {
+    let newState = JSON.parse(JSON.stringfy(state));
+    newState.inputValue = action.value;
+    return newState;
+  }
+  if (action.type === 'add_item') {
+    let newState = JSON.parse(JSON.stringfy(state));
+    newState.list.push(newState.inputValue); // push 新的内容到 list 列表中去
+    newState.inputValue = '';
+    return newState
+  }
+  return state;
+}
+```
+##### 增加 删除功能 绑定 子项响应事件
+`TodoList.js` 找到 `List` 组件的 `renderItem` 属性：
+```javascript
+<div style={{margin:'10px',width:'300px'}}>
+    <List
+        bordered
+        dataSource={this.state.list}
+        renderItem={(item,index)=>(<List.Item onClick={this.deleteItem.bind(this,index)}>{item.title}</List.Item>)}
+    />
+</div>
+```
+编写 `deleteItem` 方法，该方法接收一个 `index` 参数
+在方法里编写 `Redux` 的 `Action`
+```javascript
+deleteItem(index) {
+  const action = {
+    type: 'delete_item',
+    index
+  }
+  store.dispatch(action);
+}
+```
+##### 继续增加 Reducer 的业务逻辑 delete
+```javascript
+if (action.type === 'delete_item') {
+  let newState = JSON.parse(JSON.stringfy(state));
+  newState.list.splice(action.index, 1);
+  return newState;
+}
+```
