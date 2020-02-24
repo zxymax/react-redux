@@ -61,11 +61,91 @@ class TodoList extends Component {
                     <Input placeholder='Jorna' style={{ width:'250px' }}/>
                     <Button type="primary">增加</Button>
                 </div>
+                 <div style={{ margin:'10px',width:'300px' }}>
+                    <List
+                        bordered
+                        dataSource={list}
+                        renderItem={item=>(<List.Item>{item.title}</List.Item>)}
+                    />
+                </div>
             </div>
          );
     }
 }
 export default TodoList;
 ```
+##### src/ 创建 `store` 文件夹 store/ 文件夹下创建 index.js
+`index.js` 就是整个项目的 `store` 文件，编写以下代码：
+```javascript
+import { createStore } from 'redux'; // 引入 createStore 方法
+const store = createStore(); // 创建数据存储仓库
+export default store; // 将数据仓库暴露出去
+```
+为了避免 `store` 仓库变得很混乱，这时候就需要有一个管理能力的模块出现，这就是 `Reducers`。
+##### 在 `store/` 文件夹下，新建一个 `reducer.js` 文件，编写以下代码：
+```javascript
+const defaultState = {}; // 默认数据
+export default (state = defaultState, action) => { // 就是一个方法函数
+  return state;
+}
+```
+##### 把 reducer.js 引入到 store 中，以参数的形式传给 store。
+```javascript
+import { createStore } from 'redux';
+import reducer from './reducer.js';
+const store = createStore(reducer);
+export default store;
+```
+#### 在 store 中为 TodoList 初始化数据
+仓库 `store` 和 `reducer` 都创建好了，可以初始化一下 TodoList 中的数据了，在 `reducer.js` 文件的 `defaultState` 对象中，加入两个属性：`inputValue` 和 `list`。代码如下：
+```javascript
+// 相当于给 store 增加了两个新的数据
+const defaultState = {
+  inputValue: '请输入你的信息',
+  list: [
+    { id: 1, title: '早晨 6 点起床' },
+    { id: 2, title: '早晨 7 吃完早饭' },
+    { id: 3, title: '早晨 8 点学习' }
+  ]
+}
+export default (state = defaultState, action) => {
+  return state;
+}
+```
+#### TodoList.js 组件获得 store 中的数据
+更新 TodoList.js 文件
+```javascript
+import React, { Component } from 'react';
+import { Input, Button, List } from 'antd';
+import store from '../../store'; // 引入 store
+// 先声明一个 list 数组，填写一些内容
+
+class TodoList extends Component {
+    constructor(props) {
+      super(props);
+      this.state = store.getState();
+    }
+    render() {
+        return (
+            <div>
+                <div>
+                    <Input placeholder='Jorna' style={{ width:'250px' }}/>
+                    <Button type="primary">增加</Button>
+                </div>
+                 <div style={{ margin:'10px',width:'300px' }}>
+                    <List
+                        bordered
+                        dataSource={list}
+                        renderItem={item=>(<List.Item>{item.title}</List.Item>)}
+                    />
+                </div>
+            </div>
+         );
+    }
+}
+export default TodoList;
+```
+#### Redux DevTools 浏览器插件安装
+
 
 
