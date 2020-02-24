@@ -345,4 +345,4 @@ if (action.type === 'delete_item') {
   return newState;
 }
 ```
---未完 待更新啊--
+--未完 需要待更新--
