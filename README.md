@@ -1,68 +1,71 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### React
+#### Learn Redux
+```
+npx create-react-app redux
+cd redux
+yarn add redux
+yarn add antd
+yarn start
+```
+##### redux 工作流程
+![redux工作流程图.png](https://upload-images.jianshu.io/upload_images/8053630-72b2c91e5a9e23c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-## Available Scripts
 
-In the project directory, you can run:
+![redux工作流程图2.png](https://upload-images.jianshu.io/upload_images/8053630-51461e9184e4e967.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-### `yarn start`
+##### redux 介绍
+`Redux` 是一个用来管理数据状态和 UI 状态的 JavaScript 应用工具，随着JavaScript单页应用（SPA）开发日趋复杂，JavaScript 需要管理比任何时候都要多的 `state` (状态)，`Redux` 就是降低难度的。（Redux支持React，Angular、jQuery甚至纯JavaScript）
+`Redux` 中，可以把数据放在数据仓库（`store` 公用状态存储空间）中，这里可以统一管理状态，然后哪个组件用到了，就去 `store` 中查找状态。如果途中的紫色组件想要改变状态时，只需要改变 `store` 中的状态，然后其它组件就会跟着中的自动变化。
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+##### src/index.js 项目入口文件写入：
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+// 导入 antd UI 样式
+import 'antd/dist/antd.css';
+import './index.css';
+// 导入 TodoList 组件
+import { TodoList } from './components';
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+const App = () => {
+  return (
+    <div>
+      <TodoList />
+    </div>
+  )
+}
 
-### `yarn test`
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+##### src/components/index.js 文件将所有组件以别名形式导出
+```javascript
+export { default as TodoList } from './TodoList';
+```
+##### src/components/TodoList/index.js 创建 TodoList 组件
+```javascript
+import React, { Component } from 'react';
+import { Input, Button, List } from 'antd';
+// 先声明一个 list 数组，填写一些内容
+const list = [
+    { id: 1, title: '早晨 6 点起床' },
+    { id: 2, title: '早晨 7 吃完早饭' },
+    { id: 3, title: '早晨 8 点学习' },
+    { id: 4, title: '早晨 11 点做午饭' },
+    { id: 5, title: '早晨 13 点午休' }
+]
+class TodoList extends Component {
+    render() {
+        return (
+            <div>
+                <div>
+                    <Input placeholder='Jorna' style={{ width:'250px' }}/>
+                    <Button type="primary">增加</Button>
+                </div>
+            </div>
+         );
+    }
+}
+export default TodoList;
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
